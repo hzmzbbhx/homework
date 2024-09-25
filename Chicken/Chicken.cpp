@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstring>
 
+using namespace std;
+
 class Chicken
 {
     private:
@@ -17,7 +19,9 @@ class Chicken
                 name[i] = _name[i];
         };
 
-        
+
+
+
         //复制构造函数
         Chicken(const Chicken &other){
         age = other.age;
@@ -44,6 +48,8 @@ class Chicken
             return *this; 
         };
 
+
+        
         ~Chicken()
         {
             if (name != nullptr)
@@ -55,6 +61,8 @@ class Chicken
         }
         void setName(const char *_name)
         {
+            if(name != nullptr)
+                delete[] name;
             int len = strlen(_name) + 1;
             name = new char[len];
             for (int i = 0; i < len; i++)
@@ -73,19 +81,36 @@ class Chicken
 };
 
 int main()
-{
+{   
+    auto print =[] (const Chicken &c){
+        cout <<"hi,my name is"<<c.getName()<<"i,m "<<c.getAge()<<"years old."<<endl;   
+    };
     Chicken c(24, "Kunkun");
-    std::cout << "c: "<<"Hi, everyone! My name is " << c.getName() << ", I am " << c.getAge() << " years old." << std::endl;
-    Chicken A,B;
-    A=B=c;
-    Chicken D(A);
-    std::cout <<"A: "<< "Hi, everyone! My name is " << A.getName() << ", I am " << A.getAge() << " years old." << std::endl;
-    std::cout <<"B: "<<"Hi, everyone! My name is " << B.getName() << ", I am " << B.getAge() << " years old." << std::endl;
-    std::cout <<"D: "<< "Hi, everyone! My name is " << D.getName() << ", I am " << D.getAge() << " years old." << std::endl;
+    print (c);
+
+    Chicken d;
+    d=c;
+    print(d);
+    
+    Chicken a=c;
+    print(a);
+
+    c.setName("Zju");
+    print(c);
+    print(a);
+    print(d);
+
+    Chicken b;
+    b=d=c;
+    print(b);
+    print(d);
+
     return 0;
 }
 
-/*请优化这段代码，要求：
-1. 给这段代码增加复制操作和赋值操作，要求能实现深度赋值和连续赋值操作；
-2. 请检查最后的结果，避免出现内存泄露，消除可能的 bug，并正确使用左值引用、指针和 const 关键字。
-完成后请提交到你的 git 目录，命名为 Chicken.cpp 并确保助教能获取。*/
+
+
+
+
+
+        
