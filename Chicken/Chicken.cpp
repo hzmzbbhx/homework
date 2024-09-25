@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cstring>
 
-using namespace std;
-
 class Chicken
 {
     private:
@@ -82,8 +80,8 @@ class Chicken
 
 int main()
 {   
-    auto print =[] (const Chicken &c){
-        cout <<"hi,my name is"<<c.getName()<<"i,m "<<c.getAge()<<"years old."<<endl;   
+    /*auto print =[] (const Chicken &c){
+        std::cout <<"hi,my name is "<<c.getName()<<"i'm "<<c.getAge()<<" years old. "<<std::endl;   
     };
     Chicken c(24, "Kunkun");
     print (c);
@@ -91,7 +89,7 @@ int main()
     Chicken d;
     d=c;
     print(d);
-    
+
     Chicken a=c;
     print(a);
 
@@ -105,7 +103,7 @@ int main()
     print(b);
     print(d);
 
-    return 0;
+    return 0;*/
 }
 
 

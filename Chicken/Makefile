@@ -10,7 +10,7 @@ $(TARGET): $(Object)
 	$(CXX) $(Object) -o $(TARGET)
 
 %.o: %.cpp
-	$(CXX) -c $< -o $@
+	$(CXX) -g -c $< -o $@
 
 clean:
 	rm -f $(TARGET) $(Object)
