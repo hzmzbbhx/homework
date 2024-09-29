@@ -21,25 +21,30 @@ class Chicken
 
 
         //复制构造函数
-        Chicken(const Chicken &other){
-        age = other.age;
-        if (other.name)  {
-            name = new char[strlen(other.name) + 1];
-            strcpy(name, other.name); 
-        }
-        else name = nullptr;     
+        Chicken(const Chicken &other)
+        {
+            age = other.age;
+            if (other.name)  
+            {
+                name = new char[strlen(other.name) + 1];
+                strcpy(name, other.name); 
+            }
+            else name = nullptr;     
         };
 
         // 赋值运算函数
-        Chicken &operator=(const Chicken &other){
+        Chicken &operator=(const Chicken &other)
+        {
             if (this == &other) return *this;
             delete[] name;
             age = other.age;
-            if (other.name){
+            if (other.name)
+            {
                 name = new char[strlen(other.name) + 1];
                 strcpy(name, other.name);
             }
-            else{
+            else
+            {
                 name = nullptr;
             }
 
@@ -57,14 +62,18 @@ class Chicken
         {
             age = _age;
         }
+        //修改后
         void setName(const char *_name)
-        {
-            if(name != nullptr)
-                delete[] name;
-            int len = strlen(_name) + 1;
-            name = new char[len];
-            for (int i = 0; i < len; i++)
-                name[i] = _name[i];
+        {   
+            if(this->name != _name)
+            {
+                if(name != nullptr)
+                    delete[] name;
+                int len = strlen(_name) + 1;
+                name = new char[len];
+                for (int i = 0; i < len; i++)
+                    name[i] = _name[i];
+            }
         }
 
         const char *getName() const
@@ -80,8 +89,9 @@ class Chicken
 
 int main()
 {   
-    /*auto print =[] (const Chicken &c){
-        std::cout <<"hi,my name is "<<c.getName()<<"i'm "<<c.getAge()<<" years old. "<<std::endl;   
+    /*
+    auto print =[] (const Chicken &c){
+        std::cout <<"Hi,my name is "<<c.getName()<<". I'm "<<c.getAge()<<" years old. "<<std::endl;   
     };
     Chicken c(24, "Kunkun");
     print (c);
@@ -103,12 +113,9 @@ int main()
     print(b);
     print(d);
 
-    return 0;*/
+    c.setName(c.getName());
+    std::cout<<c.getName();
+
+    return 0;
+    */
 }
-
-
-
-
-
-
-        
