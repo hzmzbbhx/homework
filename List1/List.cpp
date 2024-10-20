@@ -57,10 +57,9 @@ int main()
     std::cout<<"\n"<<std::endl;
 
     //back,front
-    std::cout<<"back,front"<<std::endl;
     lst1=lst6;
     std::cout <<"back:"<<lst1.back()<<" "<<"front:"<<lst1.front()<< std::endl;
-
+    lst1.front()=1;
     std::cout<<"\n"<<std::endl;
 
     //insert,erase
@@ -77,22 +76,19 @@ int main()
     lst1.erase(it1,it3);
     lst1.print();
 
+    List<int>::iterator it4 =lst1.begin();
+    *it4=18;
+    lst1.print();
+    
+/*bug
 
+    lst1.clear();
+    auto it5 = --lst1.end();
+    lst1.erase(it5);
+    lst1.print();
+*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 // //    List<int> lst2 = std::move(lst);
 //     List<int> lst2 = List<int> {5, 6};
