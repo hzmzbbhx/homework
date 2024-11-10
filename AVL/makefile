@@ -6,9 +6,9 @@ LDFLAGS = -lstdc++
 
 TARGET = test
 
-Headers = Avltree.h
+Headers = BST.h
 
-Sources = main.cpp 
+Sources = test.cpp 
 
 Objects = $(Sources:.cpp=.o) 
 
