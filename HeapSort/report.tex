@@ -1,0 +1,257 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+
+\lstdefinestyle{customcpp}{
+    language=C++,
+    basicstyle=\ttfamily,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green},
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{white},
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{陈卓, 3230104877}
+\chead{数据结构与算法七次作业}
+\rhead{Nov.27th, 2024}
+
+\section{整体设计思路}
+本项目实现了一个堆排序算法的类 \texttt{HeapSort}，该类使用模板可以处理任何可比较的类型。堆排序的主要思路是将待排序的数组构建为一个最大堆，然后依次将最大堆的根元素（最大值）与数组的末尾交换，再将根元素下滤保证堆的性质，循环n次完成堆排序。
+
+\section{必要函数的功能与实现细节}
+\subsection{类结构}
+\texttt{HeapSort} 类包含两个主要公有方法：
+\begin{itemize}
+    \item \texttt{sort}：对输入的向量进行堆排序。
+\end{itemize}
+
+\subsection{辅助函数}
+\begin{itemize}
+    \item \texttt{heapify}：维护堆的性质，通过调整元素，实现自下而上的堆化过程。
+\end{itemize}
+
+\subsection{代码实现}
+\begin{lstlisting}[style=customcpp]
+#include <vector>
+#include <algorithm> 
+
+template <typename T>
+class HeapSort 
+{
+public:
+    static void sort(std::vector<T>& seq);
+
+private:
+    static void heapify(std::vector<T>& seq, int n, int i);
+};
+
+template <typename T>
+void HeapSort<T>::sort(std::vector<T>& seq) 
+{
+    int n = seq.size();
+
+    for (int i = n / 2; i > 0; --i) 
+    {
+        heapify(seq, n, i - 1);
+    }
+    
+    for (int i = n - 1; i > 0; --i) 
+    {
+        std::swap(seq[0], seq[i]); 
+        heapify(seq, i, 0);
+    }
+}
+
+template <typename T>
+void HeapSort<T>::heapify(std::vector<T>& seq, int n, int i) 
+{
+    int largest = i; 
+    int left = 2*i+1; 
+    int right = 2*i+2; 
+
+    if (left < n && seq[left] > seq[largest]) 
+    {
+        largest = left;
+    }
+
+    if (right < n && seq[right] > seq[largest]) 
+    {
+        largest = right;
+    }
+
+    if (largest != i) 
+    {
+        std::swap(seq[i], seq[largest]);
+        heapify(seq, n, largest); 
+    }
+
+    return;
+}
+\end{lstlisting}
+
+\section{测试流程}
+在 \texttt{test.cpp} 中，定义了多种不同类型的序列用于性能测试。主要测试过程如下：
+
+\begin{itemize}
+    \item 针对随机数生成的向量进行堆排序和 STL 的 \texttt{sort\_heap} 排序。
+    \item 针对已经排序的向量进行堆排序和 STL 的 \texttt{sort\_heap} 排序。
+    \item 针对逆序排列的向量进行堆排序和 STL 的 \texttt{sort\_heap} 排序。
+    \item 针对全相同元素的向量进行堆排序和 STL 的 \texttt{sort\_heap} 排序。
+\end{itemize}
+
+所有排序的时间均使用 \texttt{std::chrono} 库进行测量，并通过 \texttt{check} 函数验证排序结果的正确性。
+
+\section{测试结果}
+本地的一次性能结果如下：
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+序列类型 & HeapSort 时间 & std::sort\_heap 时间 \\
+\hline
+随机序列 & 0.314526 s & 0.457698 s \\
+\hline
+顺序序列 & 0.269998 s & 0.459314 s \\
+\hline
+逆序序列 & 0.261702 s & 0.380649 s \\
+\hline
+重复序列 & 0.0131408 s & 0.2617 s \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{时间复杂度分析}
+堆排序的时间复杂度由两个主要部分组成：建立最大堆的时间复杂度和排序过程的时间复杂度。
+
+\subsection{建立最大堆的时间复杂度}
+假设目标堆是一个满堆，即第 $k$ 层节点数为 $2^k$。输入数组规模为 $n$，堆的高度为 $h$，那么 $n$ 与 $h$ 之间满足
+
+$$
+n = 2^{h + 1} - 1,
+$$
+
+可化为 
+
+$$
+h = \log_2(n + 1) - 1. 
+$$
+
+（层数 $k$ 和高度 $h$ 均从 0 开始，即只有根节点的堆高度为 0，空堆高度为 -1）。建堆过程中每个节点需要一次下滤操作，交换的次数等于该节点到叶节点的深度。那么每一层中所有节点的交换次数为节点个数乘以叶节点到该节点的深度（如第一层的交换次数为 $2^0 \cdot h$，第二层的交换次数为 $2^1 \cdot (h - 1)$，如此类推）。
+
+从堆顶到最后一层的交换次数 $S_n$ 进行求和：
+
+$$
+S_n = 2^0 \cdot h + 2^1 \cdot (h - 1) + 2^2 \cdot (h - 2) + \ldots + 2^{h-2} \cdot 2 + 2^{h-1} \cdot 1 + 2^h \cdot 0.
+$$
+
+把首尾两个元素简化，记为 （\textbf{1}）式：
+
+$$
+\text{（\textbf{1}）:} S_n = h + 2^1 \cdot (h - 1) + 2^2 \cdot (h - 2) + \ldots + 2^{h-2} \cdot 2 + 2^{h-1}.
+$$
+
+对 （\textbf{1}） 两边乘以 2，记为 （\textbf{2}）式：
+
+$$
+\text{（\textbf{2}）: } 2 S_n = 2^1 \cdot h + 2^2 \cdot (h - 1) + 2^3 \cdot (h - 2) + \ldots + 2^{h-1} \cdot 2 + 2^h.
+$$
+
+那么用 （\textbf{2}）式减去 （\textbf{1}）式，其中 （\textbf{2}）式的操作数右移一位使指数相同的部分对齐（即错位相减法）：
+
+化简可得 （\textbf{3}）式：
+
+$$
+\text{（\textbf{3}）: } S_n = -h + 2^1 + 2^2 + 2^3 + \ldots + 2^{h-1} + 2^h.
+$$
+
+对指数部分使用等比数列求和公式：
+
+$$
+S_n = -h + \frac{a_1 \times (1 - q^n)}{1 - q}.
+$$
+
+在这个等比数列中，$a_1 = 2$，$q = 2$，则 （\textbf{3}）式为：
+
+$$
+S_n = -h + \left( \frac{2 \times (1 - 2^h)}{1 - 2} \right).
+$$
+
+化简为 （\textbf{4}）式：
+
+$$
+\text{（\textbf{4}）: } S_n = 2^{h + 1} - (h + 2).
+$$
+
+在前置条件中已得到堆的节点数 $n$ 与高度 $h$ 满足条件 $n = 2^{h + 1} - 1$（即 $2^{h + 1} = n + 1$）和 $h = \log_2(n + 1) - 1$，分别代入 ④式中的 $2^{h + 1}$ 和 $h$，因此：
+
+$$
+S_n = (n + 1) - \left( \log_2(n + 1) - 1 + 2 \right).
+$$
+
+化简后为：
+
+$$
+S_n = n - \log_2(n + 1).
+$$
+
+$$
+T_{\text{build}}(n) = O(n)
+$$
+
+\subsection{排序的时间复杂度}
+在排序阶段，每次将堆顶元素与最后一个元素交换后，进行调整。由于堆的高度为$\log n$，每次调整需要$O(\log n)$的时间。在整个排序过程中，需要执行$n - 1$次交换，因此排序的时间复杂度为：
+$$
+T_{\text{sort}}(n) = (n - 1) \times O(\log n) = O(n \log n)
+$$
+
+\subsection{综合分析}
+最终，堆排序的总时间复杂度$T_{\text{total}}(n)$可以表示为：
+$$
+T_{\text{total}}(n) = T_{\text{build}}(n) + T_{\text{sort}}(n) = O(n) + O(n \log n) = O(n \log n)
+$$
+
+因此，堆排序的时间复杂度为$O(n \log n)$。
+
+\section{与std::sort\_heap的比较}
+本地测试发现HeapSort中的sort运行速度比std::sort\_heap快，可能是因为标准库涉及更多的函数调用、内存访问、异常处理等，能实现更多情况的sort，但代价是运行时间的增加。
+
+\end{document}
