@@ -1,6 +1,6 @@
 CXX = g++
 
-CXXFLAGS = -g
+CXXFLAGS = -g -O2
 
 LDFLAGS = -lstdc++
 
