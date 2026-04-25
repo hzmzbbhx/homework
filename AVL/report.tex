@@ -1,0 +1,105 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{陈卓, 3230104877}
+\chead{数据结构与算法第六次作业}
+\rhead{Nov.10th, 2024}
+
+\section{remove()函数的设计}
+
+\subsection{detachMin()的设计}
+新增了一个函数：BinaryNode *detachMin(BinaryNode *\&t);
+
+作用是查找以 t 为根的子树中的最小节点，返回这个节点，并从原子树中删除这个节点。显然，当要删除的节点具有两个子树时，通过这个函数返回的右子树最小节点将代替被删除节点。
+
+
+具体操作：1.递归地向左子树遍历，寻找最小节点；
+
+2.一旦找到最小节点，它将其从当前树中脱离，把指针 t 更新为最小节点的右子节点；
+
+3.返回被移除的最小节点的指针。
+
+
+\subsection{remove()的修改}
+在原有基础上修改：当满足else if (t->left != nullptr \&\& t->right != nullptr) 条件，即要删除的节点具有两个子树时
+
+1.先通过detachMin(t->right)找到需要删除的节点指针t的右子树最小节点指针minNode，
+
+2.再将minNode的左右子树用t所指节点的左右子树替换
+
+3.将当前t的内容保存在oldNode后再用minNode替换t原先内容
+
+4.最后释放原先t的内存oldNode;
+
+实现细节：
+
+\begin{lstlisting}
+void remove(const Comparable &x, BinaryNode * &t) 
+{   
+    else if (t->left != nullptr && t->right != nullptr) 
+    {  
+        BinaryNode* minNode = detachMin(t->right);
+        BinaryNode *oldNode = t;
+        minNode->left = t->left; 
+        minNode->right = t->right; 
+        t = minNode; 
+        delete oldNode; 
+    }
+}
+\end{lstlisting}
+
+\section{补充：平衡调整}
+参考code代码，private里增加height成员以方便检查平衡，remove的每次递归中都会实现一次balance
+
+\section{本地time测试}
+real    0m1.477s
+
+user    0m1.455s
+
+sys     0m0.010s
+
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

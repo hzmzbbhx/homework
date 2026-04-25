@@ -1,0 +1,104 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{陈卓, 3230104877}
+\chead{数据结构与算法第五次作业}
+\rhead{Oct.30th, 2024}
+
+\section{remove()函数的设计}
+
+\subsection{detachMin()的设计}
+新增了一个函数：BinaryNode *detachMin(BinaryNode *\&t);
+
+作用是查找以 t 为根的子树中的最小节点，返回这个节点，并从原子树中删除这个节点。显然，当要删除的节点具有两个子树时，通过这个函数返回的右子树最小节点将代替被删除节点。
+
+
+具体操作：1.递归地向左子树遍历，寻找最小节点；
+2.一旦找到最小节点，它将其从当前树中脱离，把指针 t 更新为最小节点的右子节点；
+3.返回被移除的最小节点的指针。
+
+
+\subsection{remove()的修改}
+在原有基础上修改：当满足else if (t->left != nullptr \&\& t->right != nullptr) 条件，即要删除的节点具有两个子树时，先通过detachMin(t->right)找到需要删除的节点指针t的右子树最小节点指针minNode，
+再将minNode的左右子树用t所指节点的左右子树替换，将当前t存在oldNode后再用minNode替换，最后释放原先t的内存oldNode;
+
+\section{结果呈现和分析}
+创一个bst,依次插入10、5、15、3、7、12、18,再依次remove、print 7和10；
+
+如果程序无误，应输出：
+
+Tree after removing 7:
+
+3
+
+5
+
+10
+
+12
+
+15
+
+18
+
+Tree after removing 10:
+
+3
+
+5
+
+12
+
+15
+
+18
+
+\section{检查内存泄漏}
+
+我用 valgrind 进行测试，发现没有发生内存泄露。
+
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

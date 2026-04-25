@@ -1,0 +1,129 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{陈卓, 3230104877}
+\chead{数据结构与算法第四次作业}
+\rhead{Oct.16th, 2024}
+
+\section{测试程序的设计思路}
+\textcolor{red}{备注}：设计了一个 \texttt{print()} 在 \texttt{List} 的 public 部分，用来打印 \texttt{List} 的元素，方便检验各个函数的有效性。  
+
+\subsection{push\_back、pop\_back、pop\_front、push\_front(10)的验证}
+我首先创建了一个 \texttt{int} 类型的空链表 \texttt{lst1}，再用 \texttt{push\_back()} 插入 0 到 9 的元素。  
+接下来，使用 \texttt{pop\_back()}、\texttt{pop\_front()} 以及 \texttt{push\_front(10)} 删除列表最前和最后的元素 0 和 9，并从最前面插入 10。  
+最后打印 \texttt{lst1} 的元素，如果函数无误，应输出： 
+
+\textcolor{red}{10 1 2 3 4 5 6 7 8}
+
+\subsection{big5的验证}
+通过 \texttt{lst2}、\texttt{lst3}、\texttt{lst4}、\texttt{lst5}、\texttt{lst6} 分别验证构造函数、复制构造函数、移动构造函数、复制赋值运算符以及移动赋值运算符，参数设置为 \{1,2,3,4,5\}，类型为 \texttt{int}。  
+（最后两个实际上是一个函数 \texttt{List \&operator=(List copy)}）  
+依次打印验证，如果函数无误，应输出：
+
+\textcolor{red}{1 2 3 4 5} 
+
+\textcolor{red}{1 2 3 4 5} 
+
+\textcolor{red}{1 2 3 4 5} 
+
+\textcolor{red}{1 2 3 4 5} 
+
+\textcolor{red}{1 2 3 4 5}
+
+\subsection{size、empty、clear的验证}
+沿用 \texttt{lst1}，用 \texttt{size()} 输出 \texttt{lst1.theSize}，用 \texttt{empty()} 检查 \texttt{lst1} 是否为空，再用 \texttt{clear()} 清空 \texttt{lst1}，最后检查是否成功清空。  
+如果函数无误，应输出： 
+
+\textcolor{red}{9}  
+\textcolor{red}{0}  
+\textcolor{red}{1}
+
+\subsection{back、front的验证}
+\texttt{lst1} 清空后将 \texttt{lst6} 复制给 \texttt{lst1}，输出尾元素 \texttt{back()} 和首元素 \texttt{front()},同时验证其可修改性，方便起见lst1.front()=1，理论上不应报错;。  
+如果函数无误，应输出：
+
+\textcolor{red}{5 1}
+
+\subsection{insert、erase的验证}
+令迭代器 \texttt{it1} 指向 \texttt{lst1} 第二个元素，并验证并 insert(\texttt{it1}, 11)； 
+
+令迭代器 \texttt{it2} 指向 \texttt{lst1} 最后一个元素，并验证 \texttt{erase(it2)}； 
+
+令迭代器 \texttt{it3} 指向 \texttt{lst1} 最后一个元素，使用 \texttt{erase(it1, it3)} 删除该范围节点；
+
+令迭代器 \texttt{it4} 指向 \texttt{lst1} 第一个元素，使用 \texttt{*it4 = 18} 验证迭代器 \texttt{begin()} 函数的可修改性，\texttt{end()} 同理。  
+
+如果函数无误，应输出： 
+
+\textcolor{red}{1 11 2 3 4 5} 
+
+\textcolor{red}{1 11 2 3 4} 
+
+\textcolor{red}{1 11 4} 
+
+\textcolor{red}{18 11 4}
+
+
+\section{测试的结果}
+
+测试结果一切正常(上面红色部分)。
+
+我用 valgrind 进行测试，发现没有发生内存泄露。
+
+\section{（可选）bug报告}
+
+我发现了一个 bug，触发条件如下：
+
+\begin{enumerate}
+    \item 首先……\qquad List为空时.可以clear()
+    \item 然后…… \qquad 进行erase操作 
+    \item 此时发现……报错：\textcolor{red}{Segmentation fault}
+\end{enumerate}
+
+
+据我分析，它出现的原因是：it5.current为nullpur,没有next和prev，无法完成erase
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

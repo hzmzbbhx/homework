@@ -1,0 +1,276 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{geometry, CJKutf8}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+% useful packages.
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{listings}
+\usepackage{float, caption}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily, basewidth=0.5em
+}
+
+% some common command
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\difFrac}[2]{\frac{\dif #1}{\dif #2}}
+\newcommand{\pdfFrac}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\OFL}{\mathrm{OFL}}
+\newcommand{\UFL}{\mathrm{UFL}}
+\newcommand{\fl}{\mathrm{fl}}
+\newcommand{\op}{\odot}
+\newcommand{\Eabs}{E_{\mathrm{abs}}}
+\newcommand{\Erel}{E_{\mathrm{rel}}}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{陈卓, 3230104877}
+\chead{四则运算计算器}
+\rhead{11.5, 2024}
+
+\section{设计思路}
+我们的程序分为几个部分：
+\begin{itemize}
+    \item 检查输入的合法性，包括字符合法性、运算符连续性、括号匹配、除数不为0等。
+    \item 使用后缀表达式转化算法将中缀表达式转成后缀表达式。
+    \item 计算后缀表达式的值。
+\end{itemize}
+
+\section{代码实现}
+
+\subsection{函数定义}
+
+\subsubsection{操作符优先级函数：youxianji}
+\begin{verbatim}
+int youxianji(char op) 
+{
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
+}
+\end{verbatim}
+该函数用于确定操作符的优先级。加法和减法的优先级为1，乘法和除法的优先级为2。
+
+\subsubsection{执行运算函数：Operation}
+\begin{verbatim}
+double Operation(double a, double b, char op) 
+{
+    switch (op) 
+    {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/':
+            if (b == 0) 
+            {
+                throw runtime_error("ILLEGAL: Division by zero!");
+            }
+            return a / b;
+        default:
+            throw runtime_error("ILLEGAL: Illegal operation!");
+    }
+}
+\end{verbatim}
+根据操作符执行相应的数学运算。如果遇到除以零的情况，抛出异常。
+
+\subsubsection{数字转换函数：transformer}
+\begin{verbatim}
+double transformer(const string& str) 
+{
+    stringstream ss(str);
+    double value;
+    ss >> value;
+    return value;
+}
+\end{verbatim}
+该函数使用 stringstream 将字符串转换为 double 类型的数值。
+
+\subsection{主函数：evaluate}
+\begin{verbatim}
+double evaluate(const string& expression) 
+{
+    stack<double> values; // 用于存储数字
+    stack<char> ops;      // 用于存储操作符
+\end{verbatim}
+主函数开始，定义两个栈，一个用于存储数字，另一个用于存储操作符。
+
+\begin{verbatim}
+    char lastChar = ' ';
+    for (int i = 0; i < expression.length(); i++) 
+    {
+        if (expression[i] == ' ') continue;
+\end{verbatim}
+初始化一个字符变量 `lastChar` 记录前一个字符，并遍历整个表达式。
+
+\begin{verbatim}
+        if (isdigit(expression[i]) || expression[i] == '.') 
+        {
+            string number;
+            while (i < expression.length() &&
+                   (isdigit(expression[i]) || expression[i] == '.' || expression[i] == 'e' || expression[i] == 'E')) 
+            {
+                number += expression[i++];
+            }
+            i--; // 因为for循环会自增，所以需要减去1
+            values.push(transformer(number));
+            lastChar = 'n';
+        }
+\end{verbatim}
+处理数字，包括整数和小数。将数字字符串转换为数值并压入 `values` 栈。
+
+\begin{verbatim}
+        else if (expression[i] == '(') 
+        {
+            ops.push(expression[i]);
+            lastChar = '(';
+        }
+        else if (expression[i] == ')') 
+        {
+            while (!ops.empty() && ops.top() != '(') 
+            {
+                double val2 = values.top(); values.pop();
+                double val1 = values.top(); values.pop();
+                char op = ops.top(); ops.pop();
+                values.push(Operation(val1, val2, op));
+            }
+            if (ops.empty() || ops.top() != '(') 
+            {
+                throw runtime_error("ILLEGAL: Mismatched parentheses!");
+            }
+            ops.pop();
+            lastChar = ')';
+        }
+\end{verbatim}
+处理括号，左括号直接压栈，右括号则弹出操作符并计算，直到遇到左括号,如果括号不匹配，抛出异常。
+
+\begin{verbatim}
+        else if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/') 
+        {   
+            if (expression[i] == '-') 
+            {
+                if (lastChar == ' ' || lastChar == '(' || lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/') 
+                {
+                    i++; 
+                    string number;
+                    while (i < expression.length() &&
+                        (isdigit(expression[i]) || expression[i] == '.' || expression[i] == 'e' || expression[i] == 'E')) 
+                    {
+                        number += expression[i++];
+                    }
+                    i--; 
+                    values.push(-transformer(number)); 
+                    lastChar = 'n'; 
+                    continue; 
+                }
+            }
+
+            if (lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/') 
+            {
+                throw runtime_error("ILLEGAL: Invalid expression! Operator cannot follow operator.");
+            }
+            while (!ops.empty() && youxianji(ops.top()) >= youxianji(expression[i])) 
+            {
+                double val2 = values.top(); values.pop();
+                double val1 = values.top(); values.pop();
+                char op = ops.top(); ops.pop();
+                values.push(Operation(val1, val2, op));
+            }
+            ops.push(expression[i]);
+            lastChar = expression[i];
+        }
+\end{verbatim}
+首先检查当前字符是否为负号，如果是，并且前一个字符是空格、左括号或者是一个操作符，那么我们可以确定这是一个负数。代码将跳过负号，并开始收集数字字符，直到遇到非数字字符。收集到的数字字符串将被转换为数值，并取反后压入数值栈中。然后，更新 `lastChar` 为 'n'，表示前一个字符是一个数字，并继续处理下一个字符
+
+如果不是，判断lastChar是否为字符，如果是的话抛出异常。
+
+\begin{verbatim}
+        else 
+        {
+            throw runtime_error("ILLEGAL: Invalid character");
+        }
+    }
+\end{verbatim}
+如果遇到非法字符，则抛出异常。
+
+\begin{verbatim}
+    while (!ops.empty()) 
+    {
+        double val2 = values.top(); values.pop();
+        double val1 = values.top(); values.pop();
+        char op = ops.top(); ops.pop();
+        values.push(Operation(val1, val2, op));
+    }
+    return values.top();
+\end{verbatim}
+最后，计算剩余的操作符。
+
+
+\section{测试用例及结果}
+以下是所测试的表达式及其对应的计算结果：
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{表达式} & \textbf{计算结果} \\
+\hline
+$((3.14 + 2.71) * (1.41 - 0.41)) + (5.0 / 2.0)$ & $8.3500$ \\
+\hline
+$(10.0 - (3.5 * 4.2)) + (15.6 / 2.1)$ & $2.7286$ \\
+\hline
+$((8.0 / 2.0) * (3.0 + 2.0)) - (7.2 - 4.5)$ & $17.3000$ \\
+\hline
+$(5.5 + (3.3 * 2.2)) / (1.1 * 9.0)$ & $1.2889$ \\
+\hline
+$((2.0 * (1.0 + 5.0)) / (3.0 - 2.0)) + (9.9 * 0.1)$ & $12.9900$ \\
+\hline
+$(4.5 * (3.3 - 2.2)) + ((5.5 - 1.5) / 2.6)$ & $6.4885$ \\
+\hline
+$((2.5 + 3.0) * (5.0 - 1.0)) + (0.5 * 7.5)$ & $25.7500$ \\
+\hline
+$((9.9 / 3.3) - 1.0) * (2.0 + 4.0)$ & $12.0000$ \\
+\hline
+$(((8.0 + 2.5) / 2.5) * (3.0 - 0.9)) + 5.0$ & $13.8200$ \\
+\hline
+$(10.0 - (2.0 * (3.0 + 7.0))) / (2.0 * 2.0)$ & $-2.5000$ \\
+\hline
+$1e5 + 1 $ & $100001.0000$ \\
+\hline
+$1 + - 1 $ & $0.0000$ \\
+\hline
+$-1 + 2 $ & $1.0000$ \\
+\hline
+$1 / 0 $ & $- IILEGAL: Division by zero!$ \\
+\hline
+$1 + + 1 $ & $- IILEGAL: Invalid expression! Operator cannot follow operator.$ \\
+\hline
+$1 + 2)$ & $- IILEGAL: Mismatched parentheses!$ \\
+\hline
+$? $ & $- IILEGAL: Invalid character$ \\
+\hline
+\end{tabular}
+\end{center}
+用例皆正确无误，符合预期。
+
+如需新增用例，可在main.cpp中的expressions数组中添加。
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
